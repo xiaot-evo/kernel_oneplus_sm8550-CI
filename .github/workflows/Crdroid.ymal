@@ -1,0 +1,57 @@
+name: PixelOS_Kernel_CI-aston
+
+on:
+  workflow_dispatch:
+
+jobs:
+  PixelOS_Kernel_CI:
+    name: PixelOS Kernel CI
+    runs-on: self-hosted
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+
+    - name: Clone Kernel and Dependencies
+      run: |
+        git clone https://github.com/OnePlus12R-development/android_kernel_oneplus_sm8550.git --depth=1 -b sixteen-qpr1 kernel/oneplus/sm8550
+        git clone https://github.com/OnePlus12R-development/android_kernel_oneplus_sm8550-modules.git --depth=1 -b sixteen-qpr1 kernel/oneplus/sm8550-modules
+    
+    - name: Setup release name
+      run: |
+        rm -rf ${GITHUB_WORKSPACE}/*.zip
+        cd kernel/oneplus/sm8550
+        SUBLEVEL=$(grep "^SUBLEVEL =" Makefile | awk '{print $3}')
+        REL_NAME="PixelOS_OPSM8550-v5.15.${SUBLEVEL}-$(date +"%Y%m%d")"
+        echo "REL_NAME=${REL_NAME}" >> $GITHUB_ENV
+
+    - name: Build Kernel with ksu
+      run: |
+        cd kernel/oneplus/sm8550
+        build_sm8550 --clean --ksu
+        mv kernel.zip ${GITHUB_WORKSPACE}/ksu.zip
+        git clean -fdx && find . -mindepth 1 -maxdepth 1 -type d -exec test -d "{}/.git" \; -print | xargs rm -rf && git reset --hard
+        cd -
+
+    - name: Build Kernel with ksu-next
+      run: |
+        cd kernel/oneplus/sm8550
+        build_sm8550 --clean --ksu-next
+        mv kernel.zip ${GITHUB_WORKSPACE}/ksu-next.zip
+        git clean -fdx && find . -mindepth 1 -maxdepth 1 -type d -exec test -d "{}/.git" \; -print | xargs rm -rf && git reset --hard
+        cd -
+
+    - name: Build Kernel with sukisu
+      run: |
+        cd kernel/oneplus/sm8550
+        build_sm8550 --clean --sukisu
+        mv kernel.zip ${GITHUB_WORKSPACE}/sukisu.zip
+        git clean -fdx && find . -mindepth 1 -maxdepth 1 -type d -exec test -d "{}/.git" \; -print | xargs rm -rf && git reset --hard
+        cd -
+
+    - name: Create GitHub Release
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        gh release create "$REL_NAME" --title "$REL_NAME" --notes "" ksu.zip ksu-next.zip sukisu.zip
