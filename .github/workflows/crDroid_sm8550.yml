@@ -1,11 +1,11 @@
-name: PixelOS_Kernel_CI-aston
+name: crDroid_Kernel_CI-aston
 
 on:
   workflow_dispatch:
 
 jobs:
-  PixelOS_Kernel_CI:
-    name: PixelOS Kernel CI
+  crDroid_Kernel_CI:
+    name: crDroid Kernel CI
     runs-on: self-hosted
     steps:
 
@@ -16,15 +16,15 @@ jobs:
 
     - name: Clone Kernel and Dependencies
       run: |
-        git clone https://github.com/OnePlus12R-development/android_kernel_oneplus_sm8550.git --depth=1 -b sixteen-qpr1 kernel/oneplus/sm8550
-        git clone https://github.com/OnePlus12R-development/android_kernel_oneplus_sm8550-modules.git --depth=1 -b sixteen-qpr1 kernel/oneplus/sm8550-modules
+        git clone https://github.com/crdroidandroid/android_kernel_oneplus_sm8550 --depth=1 -b 16.0 kernel/oneplus/sm8550
+        git clone https://github.com/crdroidandroid/android_kernel_oneplus_sm8550-modules --depth=1 -b 16.0 kernel/oneplus/sm8550-modules
     
     - name: Setup release name
       run: |
         rm -rf ${GITHUB_WORKSPACE}/*.zip
         cd kernel/oneplus/sm8550
         SUBLEVEL=$(grep "^SUBLEVEL =" Makefile | awk '{print $3}')
-        REL_NAME="PixelOS_OPSM8550-v5.15.${SUBLEVEL}-$(date +"%Y%m%d")"
+        REL_NAME="crDroid_OPSM8550-v5.15.${SUBLEVEL}-$(date +"%Y%m%d")"
         echo "REL_NAME=${REL_NAME}" >> $GITHUB_ENV
 
     - name: Build Kernel with ksu
