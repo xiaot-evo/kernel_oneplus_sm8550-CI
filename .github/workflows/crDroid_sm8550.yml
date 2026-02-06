@@ -6,7 +6,7 @@ on:
 jobs:
   crDroid_Kernel_CI:
     name: crDroid Kernel CI
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
 
     - name: Checkout Repository
